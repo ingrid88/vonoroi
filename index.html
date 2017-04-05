@@ -22,6 +22,7 @@ console.log(SEEDS)
 
 BINS = []
 var distance_measure = location.search.split('metric=')[1]
+console.log(distance_measure)
 for(var x=0; x < WIDTH; x++) {
   for(var y=0; y < HEIGHT; y++) {
     seed_index = assign_pixel([x,y], SEEDS, distance_measure)
@@ -44,14 +45,7 @@ function assign_pixel(pixel, seeds, metric) {
     s_x = seeds[x][0]
     s_y = seeds[x][1]
 
-    if (['euclidean_distance', 'manhattan_distance'].indexOf(metric) < 0) {
-      metric = manhattan_distance
-    } else if (metric == 'euclidean_distance') {
-      metric = euclidean_distance
-    } else {
-      metric = manhattan_distance
-    }
-
+    metric = euclidean_distance
     n_d = metric(s_x,s_y,p_x,p_y)
     d = (d < n_d) ? d : n_d
     ind = (d < n_d) ? ind : x
