@@ -7,7 +7,7 @@ var g = e.getContext("2d")
 
 WIDTH=500
 HEIGHT=500
-SEED_COUNT = 100
+SEED_COUNT = 30
 
 SEEDS = []
 for(var x=0; x < SEED_COUNT; x++) {
@@ -21,9 +21,10 @@ for(var x=0; x < SEED_COUNT; x++) {
 console.log(SEEDS)
 
 BINS = []
+var distance_measure = location.search.split('metric=')[1]
 for(var x=0; x < WIDTH; x++) {
   for(var y=0; y < HEIGHT; y++) {
-    seed_index = assign_pixel([x,y], SEEDS, manhattan_distance)
+    seed_index = assign_pixel([x,y], SEEDS, distance_measure)
     g.fillStyle = "hsl("+(360*seed_index/SEED_COUNT)+",60%,60%)"
     g.fillRect(x,y,1,1)
   }
@@ -42,6 +43,14 @@ function assign_pixel(pixel, seeds, metric) {
   for(var x=0; x < seeds.length; x++) {
     s_x = seeds[x][0]
     s_y = seeds[x][1]
+
+    if (['euclidean_distance', 'manhattan_distance'].indexOf(metric) < 0) {
+      metric = manhattan_distance
+    } else if (metric == 'euclidean_distance') {
+      metric = euclidean_distance
+    } else {
+      metric = manhattan_distance
+    }
 
     n_d = metric(s_x,s_y,p_x,p_y)
     d = (d < n_d) ? d : n_d
