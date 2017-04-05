@@ -45,12 +45,18 @@ function assign_pixel(pixel, seeds, metric) {
     s_x = seeds[x][0]
     s_y = seeds[x][1]
 
-    metric = euclidean_distance
+    // metric = euclidean_distance
+    metric = l0_space
     n_d = metric(s_x,s_y,p_x,p_y)
     d = (d < n_d) ? d : n_d
     ind = (d < n_d) ? ind : x
   }
   return ind
+}
+
+// max(|x1-x2|,|y1-y2|)
+function l0_space(x,y,u,v) {
+    return  Math.max(Math.abs(u-x),Math.abs(v-y))
 }
 
 function manhattan_distance(x,y,u,v) {
