@@ -20,11 +20,13 @@ pixel_matrix = paint_voronoi();
 
 paint_seeds(3);
 RESEEDS = add_seeds(SEED_COUNT*10);
+// 1. get reseeds colors
+// pixel_color = g.getImageData(p_x,p_y,1,1).data
+// 2. for all pixel_matrix with that color perform operation
+// 3. perform for each color
+// 4. recolor pixels (how?)
 
-function fractal(){
-  
-}
-// console.log(RESEEDS);
+
 console.log(pixel_matrix)
 
 function add_seeds(seed_count){
@@ -69,11 +71,6 @@ function assign_pixel(pixel, seeds, metric) {
   for(var x=0; x < seeds.length; x++) {
     s_x = seeds[x][0]
     s_y = seeds[x][1]
-    // pixel_color = g.getImageData(p_x,p_y,1,1).data
-    // console.log(pixel_color.slice(0,5));
-    // seed_color = g.getImageData(s_x,s_y,1,1).data
-    // console.log(seed_color.slice(0,5));
-    // metric = euclidean_distance
     metric = euclidean_distance
     n_d = metric(s_x,s_y,p_x,p_y)
     d = (d < n_d) ? d : n_d
