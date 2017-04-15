@@ -18,13 +18,60 @@ console.log(distance_measure)
 
 pixel_matrix = paint_voronoi();
 
-paint_seeds(3);
-RESEEDS = add_seeds(SEED_COUNT*10);
-// 1. get reseeds colors
+paint_seeds(SEEDS, 3);
+// RESEEDS = add_seeds(SEED_COUNT*10);
+// // 1. get reseeds colors
+// reseed_colors = []
+//
+//
+// for(var i=0; i < RESEEDS.length; i++) {
+//   // pixel_color = g.getImageData(p_x,p_y,1,1).data
+//   x = RESEEDS[i][0]
+//   y = RESEEDS[i][1]
+//   seed_index = assign_pixel([x,y], SEEDS, distance_measure)
+//   h = 360*seed_index/SEED_COUNT
+//   reseed_colors.push([h,x,y])
+// }
+//
+//
+//
+//
+// console.log('reseed colors listed with x and y');
+// console.log(reseed_colors)
+// paint_seeds(RESEEDS, 1)
 // pixel_color = g.getImageData(p_x,p_y,1,1).data
 // 2. for all pixel_matrix with that color perform operation
+
 // 3. perform for each color
 // 4. recolor pixels (how?)
+function getCursorPosition(canvas, event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    console.log("x: " + x + " y: " + y);
+    return [x,y]
+}
+
+document.getElementById("c").addEventListener("click", function(event){
+  getCursorPosition(e, event)
+
+  // 1 get pos and closest seed
+  mouse_click_position = getCursorPosition(e, event)
+  var index = assign_pixel(mouse_click_position, SEEDS, euclidean_distance)
+  if (euclidean_distance(SEEDS[index][0], SEEDS[index][1], mouse_click_position[0], mouse_click_position[1]) > 10) {
+    //1a. Append position to SEEDS and increment SEED_COUNT
+    SEEDS.splice(index, 0, mouse_click_position)
+  } else {
+    // 1b. delete the seed
+    SEEDS.splice(index, 1)
+  }
+  // SEEDS.push(getCursorPosition(e, event))
+  //2. Rerun paint_vonoroi()
+  paint_voronoi()
+  //3. rerun paint_seeds()
+  paint_seeds(SEEDS,3)
+});
+
 
 
 console.log(pixel_matrix)
@@ -47,7 +94,7 @@ function paint_voronoi(){
   for(var x=0; x < WIDTH; x++) {
     for(var y=0; y < HEIGHT; y++) {
         seed_index = assign_pixel([x,y], SEEDS, distance_measure)
-        g.fillStyle = "hsl("+(360*seed_index/SEED_COUNT)+",60%,60%)"
+        g.fillStyle = "hsl("+(360*seed_index/SEEDS.length)+",60%,60%)"
         g.fillRect(x,y,1,1)
         pixel_matrix[i] = [x,y,seed_index]
         i+=1
@@ -56,8 +103,8 @@ function paint_voronoi(){
   return pixel_matrix
 }
 
-function paint_seeds(size){
-  SEEDS.forEach(function(seed){
+function paint_seeds(seeds, size){
+  seeds.forEach(function(seed){
     g.fillStyle = "black"
     g.fillRect(seed[0]-Math.floor(size/2),seed[1]-Math.floor(size/2),size,size)
   })
