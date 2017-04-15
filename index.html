@@ -13,11 +13,10 @@ SEED_COUNT = 30
 SEEDS = add_seeds(SEED_COUNT)
 
 var distance_measure = location.search.split('metric=')[1]
-console.log(distance_measure)
 
 
-pixel_matrix = paint_voronoi();
-
+var pixel_matrix = paint_voronoi();
+console.log(pixel_matrix);
 paint_seeds(SEEDS, 3);
 // RESEEDS = add_seeds(SEED_COUNT*10);
 // // 1. get reseeds colors
@@ -52,25 +51,41 @@ function getCursorPosition(canvas, event) {
     return [x,y]
 }
 
+// draw voronoi inside voronoi
 document.getElementById("c").addEventListener("click", function(event){
-  getCursorPosition(e, event)
-
-  // 1 get pos and closest seed
+  // get pos of mouse click
   mouse_click_position = getCursorPosition(e, event)
   var index = assign_pixel(mouse_click_position, SEEDS, euclidean_distance)
-  if (euclidean_distance(SEEDS[index][0], SEEDS[index][1], mouse_click_position[0], mouse_click_position[1]) > 10) {
-    //1a. Append position to SEEDS and increment SEED_COUNT
-    SEEDS.splice(index, 0, mouse_click_position)
-  } else {
-    // 1b. delete the seed
-    SEEDS.splice(index, 1)
-  }
-  // SEEDS.push(getCursorPosition(e, event))
-  //2. Rerun paint_vonoroi()
-  paint_voronoi()
-  //3. rerun paint_seeds()
-  paint_seeds(SEEDS,3)
+  // get pixels in that region
+  var relevant_pixels = pixel_matrix.filter(value => index == value[2]);
+  console.log(relevant_pixels.length);
+  // Generate set of new_seeds in region
+  var new_seeds = relevant_pixels.filter(value => Math.random() < .002)
+  console.log(new_seeds);
+  // Redraw voronoi segments
+  paint_new_voronoi(new_seeds, relevant_pixels)
 });
+
+
+
+// document.getElementById("c").addEventListener("click", function(event){
+//
+//   // 1 get pos and closest seed
+//   mouse_click_position = getCursorPosition(e, event)
+//   var index = assign_pixel(mouse_click_position, SEEDS, euclidean_distance)
+//   if (euclidean_distance(SEEDS[index][0], SEEDS[index][1], mouse_click_position[0], mouse_click_position[1]) > 10) {
+//     //1a. Append position to SEEDS and increment SEED_COUNT
+//     SEEDS.splice(index, 0, mouse_click_position)
+//   } else {
+//     // 1b. delete the seed
+//     SEEDS.splice(index, 1)
+//   }
+//   // SEEDS.push(getCursorPosition(e, event))
+//   //2. Rerun paint_vonoroi()
+//   paint_voronoi()
+//   //3. rerun paint_seeds()
+//   paint_seeds(SEEDS,3)
+// });
 
 
 
@@ -87,6 +102,28 @@ function add_seeds(seed_count){
   }
   return seeds
 }
+
+function paint_new_voronoi(new_seeds, pixels){
+  // pixel_matrix = []
+  // i = 0 s
+  for(var i=0; i< pixels.length; i++) {
+    x = pixels[i][0]
+    y = pixels[i][1]
+    // console.log(x);
+    // console.log(y);
+    seed_index = assign_pixel([x,y], new_seeds, distance_measure)
+    // console.log(seed_index);
+    g.fillStyle = "hsl("+(360*seed_index/new_seeds.length)+",60%,60%)"
+    g.fillRect(x,y,1,1)
+    // pixel_matrix[i] = [x,y,seed_index]
+    // i+=1
+  }
+  return pixel_matrix
+}
+
+// [1,2,2,3].map(function(i, x){
+//   return x + x
+// })
 
 function paint_voronoi(){
   pixel_matrix = []
