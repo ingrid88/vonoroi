@@ -78,7 +78,7 @@ document.getElementById("c").addEventListener("click", function(event){
   var new_seeds = relevant_pixels.filter(value => Math.random() < .002)
   console.log(new_seeds);
   // Redraw voronoi segments
-  paint_new_voronoi(new_seeds, relevant_pixels)
+  paint_voronoi(new_seeds, relevant_pixels)
 });
 
 
@@ -118,38 +118,14 @@ function add_seeds(seed_count){
   return seeds
 }
 
-function paint_new_voronoi(seeds, pixels, pixel_matrix=[]){
-  // i = 0 s
+function paint_voronoi(seeds, pixels, pixel_matrix=[]){
   for(var i=0; i< pixels.length; i++) {
     x = pixels[i][0]
     y = pixels[i][1]
-    // console.log(x);
-    // console.log(y);
     seed_index = assign_pixel([x,y], seeds, distance_measure)
-    // console.log(seed_index);
     g.fillStyle = "hsl("+(360*seed_index/seeds.length)+",60%,60%)"
     g.fillRect(x,y,1,1)
     pixel_matrix[i] = [x,y,seed_index]
-    i+=1
-  }
-  return pixel_matrix
-}
-
-// [1,2,2,3].map(function(i, x){
-//   return x + x
-// })
-
-function paint_voronoi(){
-  pixel_matrix = []
-  i = 0
-  for(var x=0; x < WIDTH; x++) {
-    for(var y=0; y < HEIGHT; y++) {
-        seed_index = assign_pixel([x,y], SEEDS, distance_measure)
-        g.fillStyle = "hsl("+(360*seed_index/SEEDS.length)+",60%,60%)"
-        g.fillRect(x,y,1,1)
-        pixel_matrix[i] = [x,y,seed_index]
-        i+=1
-    }
   }
   return pixel_matrix
 }
