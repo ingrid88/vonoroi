@@ -71,6 +71,7 @@ document.getElementById("c").addEventListener("click", function(event){
   // get pos of mouse click
   mouse_click_position = getCursorPosition(e, event)
   var index = assign_pixel(mouse_click_position, SEEDS, euclidean_distance)
+  console.log("index: "+index);
   // get pixels in that region
   var relevant_pixels = pixel_matrix.filter(value => index == value[2]);
   console.log(relevant_pixels.length);
@@ -78,7 +79,17 @@ document.getElementById("c").addEventListener("click", function(event){
   var new_seeds = relevant_pixels.filter(value => Math.random() < .002)
   console.log(new_seeds);
   // Redraw voronoi segments
-  paint_voronoi(new_seeds, relevant_pixels)
+  paint_voronoi(
+    new_seeds,
+    relevant_pixels)
+  // pixel_matrix = paint_voronoi(
+  //   new_seeds,
+  //   relevant_pixels,
+  //   pixel_matrix=pixel_matrix.filter(value => index != value[2])
+  // )
+  // Redraw Seeds
+  paint_seeds(new_seeds, 1);
+
 });
 
 
