@@ -12,10 +12,12 @@ SEED_COUNT = 30
 // Perform Build
 SEEDS = add_seeds(SEED_COUNT)
 
+// query param
 var distance_measure = location.search.split('metric=')[1]
 
-seeds = SEEDS
-pixels = add_pixels(width=WIDTH, height=HEIGHT)
+
+var seeds = SEEDS
+var pixels = add_pixels(width=WIDTH, height=HEIGHT)
 var pixel_matrix = paint_voronoi(seeds, pixels);
 console.log(pixel_matrix);
 paint_seeds(SEEDS, 3);
@@ -69,28 +71,41 @@ function getCursorPosition(canvas, event) {
 // draw voronoi inside voronoi
 document.getElementById("c").addEventListener("click", function(event){
   // get pos of mouse click
-  mouse_click_position = getCursorPosition(e, event)
-  var index = assign_pixel(mouse_click_position, SEEDS, euclidean_distance)
+  var mouse_click_position = getCursorPosition(e, event)
+  console.log("mouse_click_position: " + mouse_click_position);
+
+  // find index of seed closest to mouse position
+  var index = assign_pixel(mouse_click_position, seeds)
   console.log("index: "+index);
+
   // get pixels in that region
   var relevant_pixels = pixel_matrix.filter(value => index == value[2]);
-  console.log(relevant_pixels.length);
+  console.log("relevant_pixels: ");
+  console.log(relevant_pixels);
+
   // Generate set of new_seeds in region
-  var new_seeds = relevant_pixels.filter(value => Math.random() < .002)
+  var new_seeds = relevant_pixels.filter(value => Math.random() < 2/relevant_pixels.length)
+  // new seeds have 3rd element in array (x,y,pos)!!!
+  console.log("new_seeds: ");
   console.log(new_seeds);
-  // Redraw voronoi segments
-  paint_voronoi(
-    new_seeds,
-    relevant_pixels)
-  // pixel_matrix = paint_voronoi(
-  //   new_seeds,
-  //   relevant_pixels,
-  //   pixel_matrix=pixel_matrix.filter(value => index != value[2])
-  // )
+
+  // add new seeds to seeds
+  seeds = seeds.concat(new_seeds)
+  console.log("seed length: " + seeds.length);
+
+  pixel_matrix = paint_voronoi(
+    // seeds index MUST match the index associated with pixels in the canvas
+    // pixel index is assigned by the seed position in the list of seeds (currently)
+    seeds,
+    relevant_pixels,
+    pixel_matrix.filter(value => index != value[2])
+  )
+
   // Redraw Seeds
-  paint_seeds(new_seeds, 1);
+  paint_seeds(seeds, 1);
 
 });
+
 
 
 
@@ -114,9 +129,6 @@ document.getElementById("c").addEventListener("click", function(event){
 // });
 
 
-
-console.log(pixel_matrix)
-
 function add_seeds(seed_count){
   var seeds = []
   for(var x=0; x < seed_count; x++) {
@@ -129,17 +141,25 @@ function add_seeds(seed_count){
   return seeds
 }
 
-function paint_voronoi(seeds, pixels, pixel_matrix=[]){
+function paint_voronoi(given_seeds, pixels, pixel_matrix=[]){
   for(var i=0; i< pixels.length; i++) {
     x = pixels[i][0]
     y = pixels[i][1]
-    seed_index = assign_pixel([x,y], seeds, distance_measure)
-    g.fillStyle = "hsl("+(360*seed_index/seeds.length)+",60%,60%)"
+    seed_index = assign_pixel([x,y], given_seeds, distance_measure)
+    g.fillStyle = "hsl("+(360*seed_index/given_seeds.length)+",60%,60%)"
     g.fillRect(x,y,1,1)
-    pixel_matrix[i] = [x,y,seed_index]
+    pixel_matrix.push([x,y,seed_index])
   }
   return pixel_matrix
 }
+
+// function paint_seeds(seeds, size){
+//   seeds.forEach(function(seed, index){
+//     g.font = "10px Arial";
+//     g.fillStyle = "black";
+//     g.fillText(index.toString(),seed[0]-Math.floor(size/2),seed[1]-Math.floor(size/2));
+//   })
+// }
 
 function paint_seeds(seeds, size){
   seeds.forEach(function(seed){
@@ -148,14 +168,17 @@ function paint_seeds(seeds, size){
   })
 }
 
-function assign_pixel(pixel, seeds, metric) {
+function assign_pixel(pixel, given_seeds,  metric=euclidean_distance) {
   p_x = pixel[0]
   p_y = pixel[1]
   d = 500
-  ind = 0
-  for(var x=0; x < seeds.length; x++) {
-    s_x = seeds[x][0]
-    s_y = seeds[x][1]
+  ind = 0;
+  // pixel index is assigned by the seed position in the list of seeds (currently)
+  // Step 1) when new seeds are added, remove seed that was replaced by those
+  // Step 2) provide loop with starting position of new seeds in seeds list
+  for(var x=0; x < given_seeds.length; x++) {
+    s_x = given_seeds[x][0]
+    s_y = given_seeds[x][1]
     metric = euclidean_distance
     n_d = metric(s_x,s_y,p_x,p_y)
     d = (d < n_d) ? d : n_d
